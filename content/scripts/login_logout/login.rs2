@@ -1,0 +1,307 @@
+[login,_]
+mes("Welcome to Edge Scape.");
+cam_reset;
+
+%musicplay = 1; // set to auto on login
+if (%option_brightness = 0) {
+    // sane defaults for game controls
+    %option_brightness = 2;
+    %option_music = 2;
+    %option_sounds = 2;
+}
+
+// register the soft timer that handles replenishing stats
+settimer(stat_regen, 100);
+settimer(stat_boost_restore, 100);
+// same for health
+settimer(health_regen, 100);
+// random event timer
+settimer(general_macro_events, 500);
+// chest macro gas
+~check_chest_macro_gas;
+// for logout out during a general macro event, they respawn when you log back in
+queue(macro_event_login, 0, 0);
+// so pk skulls persist after logging back in
+~set_pk_skull_login;
+// so antifire persists after logging back in
+~set_antifire_login;
+// if player is in a duel, they are removed from the duel
+~duel_arena_login;
+// if player is in a gnomeball game, they login outside of the arena
+~gnomeball_login;
+// if player is on a trawler ship, they login at port sarim
+~trawler_login;
+// logging out when posioned would continue to poison you after logging back in in 2006
+~set_poison_login;
+// update weight-reduction equipment (in the case where you switch from f2p <-> p2p)
+~update_weight_equipment;
+~ferment_wines_login;
+~thieving_stall_timers_login;
+~stat_boost_login; // f2p boost reset
+
+if(inzone(movecoord(^grandtree_jail_coord, 0, 0, -2), movecoord(^grandtree_jail_coord, 3, 0, 2), coord) = true) {
+    ~grandtree_spawn_charlie;
+}
+
+~update_all(inv_getobj(worn, ^wearpos_rhand));
+cam_reset;
+
+// Edge Scape: skip tutorial island, present build choice on first login
+if (%tutorial < ^tutorial_complete) {
+    %tutorial = ^tutorial_complete;
+    p_telejump(0_48_54_22_37);
+    ~initalltabs;
+    @edgescape_choose_build;
+}
+
+~initalltabs;
+queue(follower_login, 0, 0);
+if (map_live = true) {
+    last_login_info;
+}
+
+[label,edgescape_choose_build]
+mes("Choose your build:");
+def_int $choice = ~p_choice2("Maxed Main (all 99s)", 1, "Maxed Pure (1 Defence)", 2);
+if ($choice = 1) {
+    @edgescape_setup_main;
+}
+@edgescape_setup_pure;
+
+[label,edgescape_setup_main]
+// Set all stats to 99
+stat_advance(attack, 130344310);
+stat_advance(defence, 130344310);
+stat_advance(strength, 130344310);
+stat_advance(hitpoints, 130344310);
+stat_advance(ranged, 130344310);
+stat_advance(prayer, 130344310);
+stat_advance(magic, 130344310);
+stat_advance(cooking, 130344310);
+stat_advance(woodcutting, 130344310);
+stat_advance(fletching, 130344310);
+stat_advance(fishing, 130344310);
+stat_advance(firemaking, 130344310);
+stat_advance(crafting, 130344310);
+stat_advance(smithing, 130344310);
+stat_advance(mining, 130344310);
+stat_advance(herblore, 130344310);
+stat_advance(agility, 130344310);
+stat_advance(thieving, 130344310);
+stat_advance(runecraft, 130344310);
+
+// Fill bank with maxed main PK gear
+inv_clear(bank);
+
+// GP
+inv_add(bank, coins, 10000000);
+
+// Melee weapons
+inv_add(bank, rune_scimitar, 100);
+inv_add(bank, rune_2h_sword, 100);
+inv_add(bank, dragon_dagger_p, 100);
+inv_add(bank, dragon_longsword, 50);
+inv_add(bank, dragon_battleaxe, 50);
+inv_add(bank, dragon_mace, 50);
+
+// Melee armor
+inv_add(bank, rune_platebody, 100);
+inv_add(bank, rune_platelegs, 100);
+inv_add(bank, rune_full_helm, 100);
+inv_add(bank, rune_kiteshield, 100);
+inv_add(bank, rune_chainbody, 100);
+
+// Ranged weapons & ammo
+inv_add(bank, magic_shortbow, 100);
+inv_add(bank, yew_shortbow, 100);
+inv_add(bank, rune_arrow, 10000);
+inv_add(bank, adamant_arrow, 10000);
+inv_add(bank, rune_knife, 5000);
+inv_add(bank, rune_dart, 5000);
+
+// Ranged armor
+inv_add(bank, black_dragonhide_body, 100);
+inv_add(bank, black_dragonhide_chaps, 100);
+inv_add(bank, black_dragon_vambraces, 100);
+inv_add(bank, coif, 100);
+
+// Magic staves
+inv_add(bank, mystic_fire_staff, 50);
+inv_add(bank, mystic_air_staff, 50);
+inv_add(bank, zamorak_staff, 50);
+inv_add(bank, guthix_staff, 50);
+inv_add(bank, saradomin_staff, 50);
+inv_add(bank, staff_of_fire, 50);
+
+// Runes
+inv_add(bank, deathrune, 50000);
+inv_add(bank, bloodrune, 50000);
+inv_add(bank, firerune, 50000);
+inv_add(bank, airrune, 50000);
+inv_add(bank, waterrune, 50000);
+inv_add(bank, earthrune, 50000);
+inv_add(bank, chaosrune, 50000);
+inv_add(bank, lawrune, 50000);
+inv_add(bank, naturerune, 50000);
+inv_add(bank, soulrune, 50000);
+inv_add(bank, cosmicrune, 50000);
+
+// Food
+inv_add(bank, shark, 10000);
+inv_add(bank, swordfish, 5000);
+inv_add(bank, lobster, 5000);
+
+// Potions (4 dose)
+inv_add(bank, 4dose2attack, 1000);
+inv_add(bank, 4dose2strength, 1000);
+inv_add(bank, 4dose2defense, 1000);
+inv_add(bank, 4doserangerspotion, 1000);
+inv_add(bank, 4doseprayerrestore, 1000);
+inv_add(bank, 4doseantipoison, 500);
+
+// Jewelry & accessories
+inv_add(bank, amulet_of_strength, 100);
+inv_add(bank, amulet_of_power, 100);
+inv_add(bank, amulet_of_glory_4, 100);
+inv_add(bank, ring_of_recoil, 500);
+inv_add(bank, ring_of_life, 100);
+inv_add(bank, ring_of_dueling_8, 100);
+
+// Capes
+inv_add(bank, cape_of_legends, 100);
+inv_add(bank, zamorak_cape, 100);
+inv_add(bank, black_cape, 100);
+
+// Boots
+inv_add(bank, leather_boots, 100);
+
+mes("You are now a maxed main. Your bank has been stocked with PK gear.");
+mes("Good luck out there!");
+
+[label,edgescape_setup_pure]
+// Set all stats to 99 EXCEPT defence (stays at 1)
+stat_advance(attack, 130344310);
+stat_advance(strength, 130344310);
+stat_advance(hitpoints, 130344310);
+stat_advance(ranged, 130344310);
+stat_advance(prayer, 130344310);
+stat_advance(magic, 130344310);
+stat_advance(cooking, 130344310);
+stat_advance(woodcutting, 130344310);
+stat_advance(fletching, 130344310);
+stat_advance(fishing, 130344310);
+stat_advance(firemaking, 130344310);
+stat_advance(crafting, 130344310);
+stat_advance(smithing, 130344310);
+stat_advance(mining, 130344310);
+stat_advance(herblore, 130344310);
+stat_advance(agility, 130344310);
+stat_advance(thieving, 130344310);
+stat_advance(runecraft, 130344310);
+
+// Fill bank with pure PK gear
+inv_clear(bank);
+
+// GP
+inv_add(bank, coins, 10000000);
+
+// Melee weapons
+inv_add(bank, rune_scimitar, 100);
+inv_add(bank, rune_2h_sword, 100);
+inv_add(bank, dragon_dagger_p, 100);
+inv_add(bank, dragon_longsword, 50);
+inv_add(bank, dragon_mace, 50);
+
+// Ranged weapons & ammo
+inv_add(bank, magic_shortbow, 100);
+inv_add(bank, yew_shortbow, 100);
+inv_add(bank, maple_shortbow, 100);
+inv_add(bank, rune_arrow, 10000);
+inv_add(bank, adamant_arrow, 10000);
+inv_add(bank, rune_knife, 5000);
+inv_add(bank, rune_dart, 5000);
+
+// Pure armor (1 def wearable)
+inv_add(bank, leather_boots, 100);
+inv_add(bank, leather_gloves, 100);
+inv_add(bank, dragonhide_chaps, 200);
+inv_add(bank, dragon_vambraces, 200);
+inv_add(bank, coif, 100);
+inv_add(bank, monkrobetop, 100);
+inv_add(bank, monkrobebottom, 100);
+inv_add(bank, studded_chaps, 100);
+
+// Magic staves
+inv_add(bank, mystic_fire_staff, 50);
+inv_add(bank, mystic_air_staff, 50);
+inv_add(bank, zamorak_staff, 50);
+inv_add(bank, guthix_staff, 50);
+inv_add(bank, saradomin_staff, 50);
+inv_add(bank, staff_of_fire, 50);
+
+// Runes
+inv_add(bank, deathrune, 50000);
+inv_add(bank, bloodrune, 50000);
+inv_add(bank, firerune, 50000);
+inv_add(bank, airrune, 50000);
+inv_add(bank, waterrune, 50000);
+inv_add(bank, earthrune, 50000);
+inv_add(bank, chaosrune, 50000);
+inv_add(bank, lawrune, 50000);
+inv_add(bank, naturerune, 50000);
+inv_add(bank, soulrune, 50000);
+inv_add(bank, cosmicrune, 50000);
+
+// Food (extra since pures are squishier)
+inv_add(bank, shark, 10000);
+inv_add(bank, swordfish, 5000);
+inv_add(bank, lobster, 5000);
+
+// Potions (4 dose - no super defence for pures)
+inv_add(bank, 4dose2attack, 1000);
+inv_add(bank, 4dose2strength, 1000);
+inv_add(bank, 4doserangerspotion, 1000);
+inv_add(bank, 4doseprayerrestore, 1000);
+inv_add(bank, 4doseantipoison, 500);
+
+// Jewelry & accessories
+inv_add(bank, amulet_of_strength, 100);
+inv_add(bank, amulet_of_power, 100);
+inv_add(bank, amulet_of_glory_4, 100);
+inv_add(bank, ring_of_recoil, 500);
+inv_add(bank, ring_of_life, 100);
+inv_add(bank, ring_of_dueling_8, 100);
+inv_add(bank, amulet_of_magic, 100);
+
+// Capes
+inv_add(bank, zamorak_cape, 100);
+inv_add(bank, black_cape, 100);
+
+mes("You are now a maxed pure (1 Defence). Your bank has been stocked with PK gear.");
+mes("Good luck out there!");
+
+[proc,initalltabs]
+~update_weapon_category(inv_getobj(worn, ^wearpos_rhand));
+if_settab(stats, ^tab_skills);
+if_settab(questlist, ^tab_quest_journal);
+~update_questlist;
+
+inv_transmit(inv, inventory:inv);
+if_settab(inventory, ^tab_inventory);
+
+inv_transmit(worn, wornitems:wear);
+if_settab(wornitems, ^tab_wornitems);
+
+if_settab(prayer, ^tab_prayer);
+if_settab(magic, ^tab_magic);
+if_settab(friends, ^tab_friends);
+if_settab(ignore, ^tab_ignore);
+if_settab(logout, ^tab_logout);
+if_settab(controls, ^tab_player_controls);
+if (lowmem = true) {
+    if_settab(options_ld, ^tab_game_options);
+    if_settab(music_ld, ^tab_musicplayer);
+} else {
+    if_settab(options, ^tab_game_options);
+    if_settab(music, ^tab_musicplayer);
+}

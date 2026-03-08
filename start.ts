@@ -4,7 +4,7 @@ import fs from 'fs';
 import { ExitPromptError } from '@inquirer/core';
 import { confirm, input, number, password, select } from '@inquirer/prompts';
 
-// if you're forking this feel free to change these :) it does make some assumptions elsewhere (branch names)
+// Edge Scape - forked from LostCityRS
 const repoOrg = 'https://github.com/LostCityRS';
 const engineRepo = 'Engine-TS';
 const contentRepo = 'Content';
