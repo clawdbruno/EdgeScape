@@ -1,17 +1,15 @@
 FROM oven/bun:debian
 
-RUN apt update \
-  && apt install -y --no-install-recommends default-jdk git ca-certificates bash \
-  && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /opt/server
-COPY . .
 
-RUN chown -R bun:bun /opt/server
+COPY engine/ .
 
-USER bun
+RUN bun install --frozen-lockfile
 
-RUN bun install
+# Pack data is pre-built in the repo, skip Java build step
+ENV BUILD_STARTUP=false
+ENV WEB_PORT=8888
 
 EXPOSE 8888/tcp
-ENTRYPOINT ["/opt/server/start.sh"]
+
+CMD ["bun", "run", "src/app.ts"]
